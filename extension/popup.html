@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>VidManager</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 4v10" />
+          <path d="M7 10l5 5 5-5" />
+          <path d="M5 20h14" />
+        </svg>
+      </div>
+      <div class="head-text">
+        <span class="name">VidManager</span>
+        <span class="conn" id="conn"><span class="dot" id="dot"></span><span id="conn-text">verificando…</span></span>
+      </div>
+    </header>
+
+    <section id="pair-view" class="view hidden">
+      <p class="lead">Pareie a extensão com o aplicativo para começar.</p>
+
+      <label class="field">
+        <span>Código de 6 dígitos</span>
+        <input id="code" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="000000" />
+      </label>
+
+      <label class="field">
+        <span>Porta da API</span>
+        <input id="port" type="number" min="1024" max="65535" value="41300" />
+      </label>
+
+      <button id="pair-btn" class="primary">Conectar</button>
+
+      <p class="hint">
+        O código aparece em <strong>VidManager → Configurações → Extensão e API local</strong>.
+      </p>
+    </section>
+
+    <section id="main-view" class="view hidden">
+      <div class="page">
+        <span class="page-label">Página atual</span>
+        <div class="page-title" id="page-title">—</div>
+        <div class="page-url" id="page-url">—</div>
+      </div>
+
+      <div class="detect" id="detect">Verificando mídia na página…</div>
+
+      <label class="field">
+        <span>Qualidade</span>
+        <select id="preset">
+          <option value="best">Melhor qualidade compatível</option>
+          <option value="max">Máxima qualidade</option>
+          <option value="audio">Só áudio (MP3)</option>
+        </select>
+      </label>
+
+      <button id="send-btn" class="primary">Baixar com VidManager</button>
+
+      <div class="row">
+        <button id="unpair" class="link">Desparear</button>
+        <span class="version">v1.0.0</span>
+      </div>
+    </section>
+
+    <div id="status" class="status-msg hidden"></div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
