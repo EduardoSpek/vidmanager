@@ -436,7 +436,9 @@ fn vincular(
         output_dir.trim_end_matches(['\\', '/'])
     );
     let titulo = if total > 1 {
-        format!("{} ({indice}/{total})", post.title)
+        // Índice na frente: na lista o título é truncado no fim, então o
+        // sufixo "(3 de 9)" sumiria e os itens ficariam iguais.
+        format!("{indice}/{total} · {}", post.title)
     } else {
         post.title.clone()
     };
