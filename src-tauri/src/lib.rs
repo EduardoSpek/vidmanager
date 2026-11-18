@@ -59,6 +59,25 @@ pub fn run() {
                 });
             }
 
+            // Concluídos antigos podem ter ficado sem o caminho do arquivo; tenta
+            // achá-los na pasta de saída para o botão "Abrir pasta" aparecer.
+            {
+                let h = handle.clone();
+                tauri::async_runtime::spawn_blocking(move || {
+                    let st = h.state::<AppState>();
+                    let pendentes: Vec<_> = st
+                        .all()
+                        .into_iter()
+                        .filter(|d| d.status == "completed" && d.filepath.is_none())
+                        .collect();
+                    for d in pendentes {
+                        if let Some(p) = ytdlp::localizar_saida(&st, &d) {
+                            let _ = st.patch(&d.id, |cur| cur.filepath = Some(p));
+                        }
+                    }
+                });
+            }
+
             // Fila: inicia os itens enfileirados respeitando o limite de simultâneos.
             {
                 let h = handle.clone();
@@ -239,6 +258,7 @@ pub fn run() {
             commands::install_deno,
             commands::open_path,
             commands::reveal_path,
+            commands::abrir_link,
             commands::pick_folder,
             commands::pairing_info,
             commands::rotate_pairing,

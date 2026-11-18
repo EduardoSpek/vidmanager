@@ -28,6 +28,7 @@ export const api = {
   installDeno: () => invoke<string>("install_deno"),
   openPath: (path: string) => invoke<void>("open_path", { path }),
   revealPath: (path: string) => invoke<void>("reveal_path", { path }),
+  abrirLink: (url: string) => invoke<void>("abrir_link", { url }),
   pickFolder: () => invoke<string | null>("pick_folder"),
   pairingInfo: () => invoke<PairingInfo>("pairing_info"),
   rotatePairing: () => invoke<PairingInfo>("rotate_pairing"),

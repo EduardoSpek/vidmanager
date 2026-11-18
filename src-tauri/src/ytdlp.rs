@@ -352,7 +352,9 @@ async fn run(app: AppHandle, id: String) {
 
     let success = matches!(&status, Ok(s) if s.success());
     if success {
-        let path = filepath.or_else(|| current.filepath.clone());
+        let path = filepath
+            .or_else(|| current.filepath.clone())
+            .or_else(|| localizar_saida(&state, &current));
         let title_from_path = path
             .as_ref()
             .and_then(|p| Path::new(p).file_stem().map(|s| s.to_string_lossy().to_string()))
@@ -483,6 +485,97 @@ fn notify(app: &AppHandle, title: &str, body: &str) {
         .title(title.to_string())
         .body(short)
         .show();
+}
+
+/// Id do vídeo na URL (YouTube: `v=`, Shorts: último segmento). Usado só como
+/// pista para achar o arquivo quando o yt-dlp não informa o caminho final.
+fn id_da_url(url: &str) -> Option<String> {
+    let sem_query = url.split(['?', '#']).next().unwrap_or(url);
+    if let Some(pos) = url.find("v=") {
+        let resto = &url[pos + 2..];
+        let id = resto.split(['&', '#']).next().unwrap_or(resto);
+        if !id.is_empty() {
+            return Some(id.to_string());
+        }
+    }
+    sem_query
+        .trim_end_matches('/')
+        .rsplit('/')
+        .next()
+        .filter(|s| s.len() >= 6)
+        .map(|s| s.to_string())
+}
+
+/// Procura na pasta de saída o arquivo recém-baixado cujo nome contém `[id]`.
+///
+/// Rede de segurança para quando o yt-dlp não emite o caminho final (mudança de
+/// template, extrator que não reporta `filepath`, etc.). Varre no máximo 4 níveis
+/// e alguns milhares de arquivos para não pesar em pastas grandes.
+pub(crate) fn localizar_saida(state: &AppState, d: &Download) -> Option<String> {
+    let id = id_da_url(&d.url)?;
+    let base = state
+        .settings
+        .lock()
+        .ok()
+        .map(|s| s.output_dir.clone())
+        .filter(|p| !p.trim().is_empty())?;
+    let base = PathBuf::from(base);
+    if !base.exists() {
+        return None;
+    }
+
+    let limite = d.created_at - 10_000;
+    let marca = format!("[{id}]");
+    let mut melhor: Option<(u64, String)> = None;
+    let mut vistos = 0usize;
+
+    fn visitar(
+        dir: &Path,
+        profundidade: u8,
+        marca: &str,
+        limite: i64,
+        vistos: &mut usize,
+        melhor: &mut Option<(u64, String)>,
+    ) {
+        if profundidade > 4 || *vistos > 20000 {
+            return;
+        }
+        let Ok(entradas) = std::fs::read_dir(dir) else {
+            return;
+        };
+        for entrada in entradas.flatten() {
+            *vistos += 1;
+            let caminho = entrada.path();
+            if caminho.is_dir() {
+                visitar(&caminho, profundidade + 1, marca, limite, vistos, melhor);
+                continue;
+            }
+            let nome = entrada.file_name().to_string_lossy().to_string();
+            if nome.ends_with(".part") || nome.ends_with(".ytdl") {
+                continue;
+            }
+            if !nome.contains(marca) {
+                continue;
+            }
+            let mod_ms = entrada
+                .metadata()
+                .and_then(|m| m.modified())
+                .ok()
+                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                .map(|d| d.as_millis() as u64)
+                .unwrap_or(0);
+            if (mod_ms as i64) < limite {
+                continue;
+            }
+            let atual_melhor = melhor.as_ref().map(|(m, _)| *m).unwrap_or(0);
+            if mod_ms >= atual_melhor {
+                *melhor = Some((mod_ms, caminho.to_string_lossy().to_string()));
+            }
+        }
+    }
+
+    visitar(&base, 0, &marca, limite, &mut vistos, &mut melhor);
+    melhor.map(|(_, p)| p)
 }
 
 pub fn build_args(

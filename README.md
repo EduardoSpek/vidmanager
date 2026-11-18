@@ -205,3 +205,7 @@ O VidManager é uma ferramenta pessoal. Baixar conteúdo protegido por direitos 
 autorização pode violar os termos de uso dos sites e a legislação aplicável. Use com conteúdo
 próprio, de domínio público, Creative Commons ou que você tenha direito de baixar. Não há suporte a
 DRM ou a serviços de streaming por assinatura.
+
+---
+
+Desenvolvido por **Eduardo Spek** — Instagram [@eduardospek](https://www.instagram.com/eduardospek).

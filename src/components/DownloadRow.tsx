@@ -15,6 +15,7 @@ import { StatusBadge } from "./StatusBadge";
 
 export function DownloadRow({ download }: { download: Download }) {
   const toast = useApp((s) => s.toast);
+  const outputDir = useApp((s) => s.info?.outputDir);
   const act = async (fn: () => Promise<unknown>) => {
     try {
       await fn();
@@ -22,6 +23,9 @@ export function DownloadRow({ download }: { download: Download }) {
       toast({ kind: "error", message: errorMessage(error) });
     }
   };
+
+  // Concluído sem caminho (o yt-dlp nem sempre reporta): abre a pasta de downloads.
+  const pasta = download.filepath ?? (download.status === "completed" ? outputDir : null);
 
   const size =
     download.totalBytes > 0
@@ -82,11 +86,15 @@ export function DownloadRow({ download }: { download: Download }) {
             <RotateCcw size={14} />
           </button>
         ) : null}
-        {download.filepath ? (
+        {pasta ? (
           <button
             className="icon-btn"
-            title="Abrir pasta"
-            onClick={() => act(() => api.revealPath(download.filepath as string))}
+            title={download.filepath ? "Abrir pasta" : "Abrir pasta de downloads"}
+            onClick={() =>
+              act(() =>
+                download.filepath ? api.revealPath(download.filepath) : api.openPath(pasta)
+              )
+            }
           >
             <FolderOpen size={14} />
           </button>

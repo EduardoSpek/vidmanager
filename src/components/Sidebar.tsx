@@ -1,4 +1,6 @@
-import { Home, Library, Settings as SettingsIcon, Zap } from "lucide-react";
+import { Home, Instagram, Library, Settings as SettingsIcon, Zap } from "lucide-react";
+import { api } from "../lib/api";
+import { AUTHOR } from "../lib/author";
 import { useDownloadsList, useApp, type Screen } from "../store/useApp";
 
 const ITEMS: { id: Screen; label: string; icon: typeof Home }[] = [
@@ -52,6 +54,17 @@ export function Sidebar() {
             <span className="side-value">
               {binaries?.ytdlp ? `v${binaries.ytdlp.version}` : "não instalado"}
             </span>
+          </span>
+        </button>
+        <button
+          className="side-credit"
+          title={`Instagram ${AUTHOR.handle}`}
+          onClick={() => api.abrirLink(AUTHOR.instagram).catch(() => undefined)}
+        >
+          <span className="side-credit-by">Desenvolvido por</span>
+          <span className="side-credit-name">
+            {AUTHOR.name}
+            <Instagram size={12} />
           </span>
         </button>
       </div>

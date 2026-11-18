@@ -9,6 +9,8 @@ import {
   FolderOpen,
   Gauge,
   HardDrive,
+  Info,
+  Instagram,
   KeyRound,
   Loader2,
   Puzzle,
@@ -19,6 +21,7 @@ import {
 } from "lucide-react";
 import { api, errorMessage } from "../lib/api";
 import { refreshBinaries } from "../lib/actions";
+import { AUTHOR } from "../lib/author";
 import { useApp } from "../store/useApp";
 import type { PairingInfo, Settings as SettingsType } from "../lib/types";
 
@@ -26,6 +29,7 @@ export function SettingsScreen() {
   const saved = useApp((s) => s.settings);
   const setSettings = useApp((s) => s.setSettings);
   const binaries = useApp((s) => s.binaries);
+  const info = useApp((s) => s.info);
   const toast = useApp((s) => s.toast);
 
   const [draft, setDraft] = useState<SettingsType | null>(saved);
@@ -455,6 +459,37 @@ export function SettingsScreen() {
             <FolderOpen size={14} />
             Abrir pasta de binários
           </button>
+        </Card>
+
+        <Card icon={<Info size={16} />} title="Sobre" sub="Créditos e informações do app" wide>
+          <div className="about-row">
+            <div className="about-id">
+              <span className="about-name">VidManager</span>
+              <span className="about-ver">{info?.version ? `v${info.version}` : "—"}</span>
+            </div>
+            <button
+              className="btn btn-ghost"
+              onClick={() => api.abrirLink(AUTHOR.instagram).catch(() => undefined)}
+            >
+              <Instagram size={14} />
+              {AUTHOR.handle}
+            </button>
+          </div>
+          <div className="about-credit">
+            <span>
+              Desenvolvido por <strong>{AUTHOR.name}</strong>
+            </span>
+            <a
+              className="about-link"
+              href={AUTHOR.instagram}
+              onClick={(event) => {
+                event.preventDefault();
+                api.abrirLink(AUTHOR.instagram).catch(() => undefined);
+              }}
+            >
+              {AUTHOR.instagram.replace(/^https:\/\/www\./, "")}
+            </a>
+          </div>
         </Card>
       </div>
 

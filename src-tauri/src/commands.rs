@@ -344,6 +344,24 @@ pub fn reveal_path(path: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Abre um link http(s) no navegador padrão (créditos e redes sociais).
+///
+/// Só aceita http/https e passa a URL como argumento comum: sem `cmd /C`, então
+/// não há como a string virar comando.
+#[tauri::command]
+pub fn abrir_link(url: String) -> Result<(), String> {
+    let alvo = url.trim().to_string();
+    if !(alvo.starts_with("https://") || alvo.starts_with("http://")) {
+        return Err("Link inválido.".to_string());
+    }
+    let mut cmd = std::process::Command::new("rundll32.exe");
+    cmd.arg("url.dll,FileProtocolHandler").arg(&alvo);
+    binaries::hide(&mut cmd);
+    cmd.spawn()
+        .map(|_| ())
+        .map_err(|e| format!("Não foi possível abrir o link: {e}"))
+}
+
 /// Abre o Explorer na pasta (ou com o arquivo selecionado).
 ///
 /// No Windows a linha de comando é montada crua: `explorer /select,"C:\caminho com espaço\a.mp4"`.
