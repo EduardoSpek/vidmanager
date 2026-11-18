@@ -20,7 +20,7 @@ Construído com **Tauri 2 + React + TypeScript + Rust**.
 - **Fila e concorrência**: até 6 downloads simultâneos, limite de velocidade, pausa, retomada, cancelamento e repetição. Cancelar também apaga o arquivo parcial; pausar preserva para retomar do mesmo ponto.
 - **Histórico persistente**: SQLite local, sobrevive a fechar o app; downloads interrompidos voltam como pausados.
 - **Monitor de área de transferência**: sugere o download quando você copia um link.
-- **Extensão Chrome/Edge (MV3)**: envia a página atual para o app com um clique, incluindo cookies para vídeos que exigem login.
+- **Extensão Chrome/Edge (MV3)**: botão **Baixar** injetado nas páginas do YouTube (vídeo único, preset do app) e envio da página atual pelo popup ou menu de contexto, incluindo cookies para vídeos que exigem login.
 - **API local autenticada**: `127.0.0.1:41300`, token de pareamento e CORS restrito.
 - **Interface**: dark, PT-BR, barra de título própria, notificações nativas.
 
@@ -72,7 +72,25 @@ Saída em `src-tauri/target/release/bundle/nsis/VidManager_0.1.0_x64-setup.exe`.
 5. No popup da extensão, digite o código e clique em **Conectar**.
 
 Depois disso, abra qualquer vídeo e clique no ícone do VidManager → **Baixar com VidManager**.
-Também há a opção **Baixar com VidManager** no menu de contexto (clique direito).
+Também há a opção **Baixar com VidManager** no menu de contexto (clique direito) e um botão
+**Baixar** injetado na própria página do YouTube (veja abaixo).
+
+### Botão "Baixar" no YouTube
+
+Em páginas de vídeo do YouTube aparece um botão **Baixar** ao lado de Curtir/Compartilhar.
+O comportamento:
+
+- baixa **somente o vídeo atual** — se a URL tiver `&list=`, a playlist é ignorada;
+- usa o preset configurado no app (melhor qualidade compatível ou máxima qualidade bruta),
+  sem abrir a janela de formatos;
+- funciona em `youtube.com/watch`, `youtube.com/shorts/<id>`, `youtube.com/live/<id>`,
+  `m.youtube.com` e `music.youtube.com` (nestes dois últimos, como botão flutuante);
+- acompanha a navegação interna do YouTube (SPA): vai para o próximo vídeo sozinho, sem duplicar;
+- mostra o resultado no próprio botão ("Adicionado ✓" ou "Erro") e num aviso no canto da tela.
+
+Para baixar com outro formato, use o popup da extensão (ele abre a janela de formatos no app).
+Se o botão não aparecer, recarregue a página depois de conectar a extensão (o botão só é
+injetado em páginas abertas após a instalação).
 
 > A extensão é instalada "sem compactação" porque a Chrome Web Store não aceita esse tipo de
 > ferramenta. Ela não é publicada em loja.
@@ -145,6 +163,7 @@ aberta desde 2024), então o app faz a extração por conta própria, em `src-ta
 | Vídeo pede login/idade | Configurações → Cookies do navegador (Chrome/Edge/Firefox) ou use a extensão, que envia cookies |
 | ffmpeg ausente | Configurações → Binários → Instalar (baixa ~80 MB e extrai só o executável) |
 | Extensão não conecta | App aberto? API local ativa? Porta igual nos dois lados? Código expirado (gere outro) |
+| Botão "Baixar" não aparece no YouTube | Recarregue a página do vídeo; o botão só é injetado em páginas abertas depois de instalar/conectar a extensão |
 | Threads: "não tem vídeo" | O post é só texto/imagem, ou é privado. Confira abrindo o link deslogado |
 | Threads: erro em download antigo | As URLs do CDN expiram; clique em Repetir para resolver o post de novo |
 | Antivírus/SmartScreen | O instalador não é assinado digitalmente; use "Mais informações → Executar assim mesmo" |
@@ -168,6 +187,9 @@ vidmanager/
 │  │  └─ state.rs           # estado compartilhado
 │  └─ tauri.conf.json
 ├─ extension/               # extensão MV3 (Chrome/Edge)
+│  ├─ youtube.js            # botão "Baixar" nas páginas do YouTube
+│  ├─ background.js         # pareamento, cookies, POST /download
+│  └─ popup.html/js/css     # popup da extensão
 └─ scripts/                 # geração de ícone
 ```
 
