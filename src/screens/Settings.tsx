@@ -294,7 +294,7 @@ export function SettingsScreen() {
         <Card
           icon={<Puzzle size={16} />}
           title="Extensão e API local"
-          sub="Receba vídeos direto do Chrome ou Edge"
+          sub="Receba vídeos direto do Chrome, Edge ou Brave"
           wide
         >
           <Row label="API local" hint="Reinicie o aplicativo após mudar a porta ou desativar.">
@@ -357,8 +357,8 @@ export function SettingsScreen() {
             <div className="install-step">
               <span className="step-num">1</span>
               <span>
-                Abra <code>chrome://extensions</code> (ou <code>edge://extensions</code>) e ative o modo
-                desenvolvedor.
+                Abra <code>chrome://extensions</code>, <code>edge://extensions</code> ou{" "}
+                <code>brave://extensions</code> e ative o modo desenvolvedor.
               </span>
             </div>
             <div className="install-step">

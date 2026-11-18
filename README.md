@@ -20,7 +20,7 @@ Construído com **Tauri 2 + React + TypeScript + Rust**.
 - **Fila e concorrência**: até 6 downloads simultâneos, limite de velocidade, pausa, retomada, cancelamento e repetição. Cancelar também apaga o arquivo parcial; pausar preserva para retomar do mesmo ponto.
 - **Histórico persistente**: SQLite local, sobrevive a fechar o app; downloads interrompidos voltam como pausados.
 - **Monitor de área de transferência**: sugere o download quando você copia um link.
-- **Extensão Chrome/Edge (MV3)**: botão **Baixar** injetado nas páginas do YouTube (vídeo único, preset do app) e envio da página atual pelo popup ou menu de contexto, incluindo cookies para vídeos que exigem login.
+- **Extensão Chrome/Edge/Brave (MV3)**: botão **Baixar** injetado nas páginas do YouTube (vídeo único, preset do app) e envio da página atual pelo popup ou menu de contexto, incluindo cookies para vídeos que exigem login.
 - **API local autenticada**: `127.0.0.1:41300`, token de pareamento e CORS restrito.
 - **Interface**: dark, PT-BR, barra de título própria, notificações nativas.
 
@@ -63,9 +63,9 @@ Saída em `src-tauri/target/release/bundle/nsis/VidManager_0.1.0_x64-setup.exe`.
 
 ---
 
-## Instalar a extensão (Chrome ou Edge)
+## Instalar a extensão (Chrome, Edge ou Brave)
 
-1. Abra `chrome://extensions` ou `edge://extensions`.
+1. Abra `chrome://extensions`, `edge://extensions` ou `brave://extensions`.
 2. Ative o **modo desenvolvedor**.
 3. Clique em **Carregar sem compactação** e selecione a pasta `extension/`.
 4. Abra o VidManager → **Configurações → Extensão e API local** e copie o código de 6 dígitos.
@@ -74,6 +74,10 @@ Saída em `src-tauri/target/release/bundle/nsis/VidManager_0.1.0_x64-setup.exe`.
 Depois disso, abra qualquer vídeo e clique no ícone do VidManager → **Baixar com VidManager**.
 Também há a opção **Baixar com VidManager** no menu de contexto (clique direito) e um botão
 **Baixar** injetado na própria página do YouTube (veja abaixo).
+
+Funciona igual nos três navegadores: é o mesmo pacote (MV3) e a pasta `extension/` pode ser
+carregada em qualquer um deles, inclusive ao mesmo tempo. No Brave não é preciso desligar o
+**Shields** — o botão conversa com `127.0.0.1`, que não passa pelo bloqueio de anúncios.
 
 ### Botão "Baixar" no YouTube
 
@@ -186,7 +190,7 @@ vidmanager/
 │  │  ├─ db.rs              # SQLite
 │  │  └─ state.rs           # estado compartilhado
 │  └─ tauri.conf.json
-├─ extension/               # extensão MV3 (Chrome/Edge)
+├─ extension/               # extensão MV3 (Chrome/Edge/Brave)
 │  ├─ youtube.js            # botão "Baixar" nas páginas do YouTube
 │  ├─ background.js         # pareamento, cookies, POST /download
 │  └─ popup.html/js/css     # popup da extensão
