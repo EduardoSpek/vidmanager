@@ -15,6 +15,7 @@
   let mountedFor = null;
   let resetTimer = null;
   let lastDeepSearch = 0;
+  let deepTries = 0;
 
   // A barra de ações do watch vive no DOM normal; estes seletores bastam no
   // caminho comum e evitam varrer o documento inteiro a cada ciclo.
@@ -88,9 +89,16 @@
         if (isVisible(node)) return node;
       }
     }
+    // Shorts e mobile não têm a barra do watch: varrer o DOM ali seria só custo.
+    if (location.pathname.startsWith("/shorts/") || !document.querySelector("ytd-watch-metadata")) {
+      return null;
+    }
+    // Reserva para uma eventual mudança de layout: poucas tentativas, espaçadas.
+    if (deepTries >= 3) return null;
     const now = Date.now();
-    if (now - lastDeepSearch < 5000) return null;
+    if (now - lastDeepSearch < 10000) return null;
     lastDeepSearch = now;
+    deepTries += 1;
     const deep = deepQuery("#top-level-buttons-computed") || deepQuery("#actions-inner");
     return deep && isVisible(deep) ? deep : null;
   }
@@ -157,6 +165,7 @@
     </svg>`;
 
   function mountButton() {
+    deepTries = 0;
     const host = document.createElement("div");
     host.id = HOST_ID;
 
